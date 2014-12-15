@@ -1,6 +1,7 @@
 ﻿using GridView2.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -24,7 +25,7 @@ namespace GridView2
     public sealed partial class MainPage : Page
     {
         private IList<Person> people;
-        private IList<Group<object, Person>> groupedPeople;
+        private ObservableCollection<Group<string, Person>> groupedPeople;
 
         public MainPage()
         {
@@ -36,22 +37,42 @@ namespace GridView2
 
         private void FilterPeople()
         {
-            groupedPeople = (from person in people
-                             group person by person.City into g
-                             orderby g.Key
-                             select new Group<object, Person>
-                             {
-                                Key = g.Key.ToString(),
-                                Items = g.ToList()
-                             }).ToList();
+            var result = (from person in people
+                          group person by person.City into g
+                          orderby g.Key
+                          select new Group<string, Person>
+                          {
+                              Key = g.Key.ToString(),
+                              Items = new ObservableCollection<Person>(g.ToList())
+                          }).ToList();
+            groupedPeople = new ObservableCollection<Group<string, Person>>(result);
             cvs.Source = groupedPeople;
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            List<Person> newData = (List<Person>) Person.CreatePeople(1);
-            people.Add(newData[0]);
-            FilterPeople();
+            ObservableCollection<Person> people = Person.CreatePeople(1);
+            Person person = people[0];
+            var result = (from g in groupedPeople
+                          where g.Key == person.City
+                          select g);
+            if (result.Count() > 0)
+            {
+                Group<string, Person> group = result.First();
+                //group.Items.Add(person);
+                group.Items.AddSorted(person);
+            }
+            else
+            {
+                Group<string, Person> group = new Group<string, Person>
+                {
+                    Key = person.City,
+                    Items = new ObservableCollection<Person>(people.ToList())
+                };
+                //groupedPeople.Add(group);
+                groupedPeople.AddSorted(group);
+            }
+            cvs.Source = groupedPeople;
         }
     }
 }
