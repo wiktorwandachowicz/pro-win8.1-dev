@@ -12,6 +12,11 @@
                               IsSourceGrouped="True"
                               ItemsPath="Items" />
     </Page.Resources>
+	<Page.BottomAppBar>
+		<CommandBar>
+			<AppBarButton x:Name="AddButton" Icon="Add" Label="Add Person" Click="AddButton_Click"/>
+		</CommandBar>
+	</Page.BottomAppBar>
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <GridView x:Name="myGridView"

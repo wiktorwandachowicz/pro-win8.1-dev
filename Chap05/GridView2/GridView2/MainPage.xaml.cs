@@ -30,7 +30,12 @@ namespace GridView2
         {
             this.InitializeComponent();
 
-            people = Person.CreatePeople(200).ToList();
+            people = Person.CreatePeople(5).ToList();
+            FilterPeople();
+        }
+
+        private void FilterPeople()
+        {
             groupedPeople = (from person in people
                              group person by person.City into g
                              orderby g.Key
@@ -40,6 +45,13 @@ namespace GridView2
                                 Items = g.ToList()
                              }).ToList();
             cvs.Source = groupedPeople;
+        }
+
+        private void AddButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<Person> newData = (List<Person>) Person.CreatePeople(1);
+            people.Add(newData[0]);
+            FilterPeople();
         }
     }
 }
