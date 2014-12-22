@@ -49,7 +49,7 @@ namespace GridApp
             if (System.Diagnostics.Debugger.IsAttached)
             {
                 // Display the current frame rate counters
-                this.DebugSettings.EnableFrameRateCounter = true;
+                //this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
 

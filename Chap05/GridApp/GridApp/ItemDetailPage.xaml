@@ -33,7 +33,20 @@
             TODO: Content should be placed within the following grid 
                   to show details for the current item
         -->
-        <Grid Grid.Row="1" x:Name="contentRegion"/>
+        <Grid Grid.Row="1" x:Name="contentRegion">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Background="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}" Width="180" Height="180" VerticalAlignment="Top">
+                <Image Source="{Binding ImagePath}" Stretch="UniformToFill" AutomationProperties.Name="{Binding Title}"/>
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="10,0,10,50">
+                <TextBlock Text="{Binding Title}" Style="{StaticResource SubheaderTextBlockStyle}" TextWrapping="NoWrap"/>
+                <TextBlock Text="{Binding Subtitle}" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="NoWrap" Margin="0,0,0,20"/>
+                <TextBlock Text="{Binding Content}" Style="{StaticResource BodyTextBlockStyle}"/>
+            </StackPanel>
+        </Grid>
 
         <!-- Back button and page title -->
         <Grid>
