@@ -11,14 +11,22 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <!-- Collection of items displayed by this page -->
+        <CollectionViewSource
+            x:Name="itemsViewSource"
+            Source="{Binding Items}"
+            d:Source="{Binding Groups[0].Items, Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}"/>
+    </Page.Resources>
+
     <!--
         This grid acts as a root panel for the page that defines two rows:
         * Row 0 contains the back button and page title
         * Row 1 contains the rest of the page layout
     -->
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-        DataContext="{Binding Item}"
-        d:DataContext="{Binding Groups[0].Items[0], Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}">
+        DataContext="{Binding Group}"
+        d:DataContext="{Binding Groups[0].Items, Source={d:DesignData Source=/DataModel/SampleData.json, Type=data:SampleDataSource}}">
         <Grid.ChildrenTransitions>
             <TransitionCollection>
                 <EntranceThemeTransition/>
@@ -33,7 +41,7 @@
             TODO: Content should be placed within the following grid 
                   to show details for the current item
         -->
-        <Grid Grid.Row="1" x:Name="contentRegion">
+        <!--<Grid Grid.Row="1" x:Name="contentRegion">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -46,7 +54,79 @@
                 <TextBlock Text="{Binding Subtitle}" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="NoWrap" Margin="0,0,0,20"/>
                 <TextBlock Text="{Binding Content}" Style="{StaticResource BodyTextBlockStyle}"/>
             </StackPanel>
-        </Grid>
+        </Grid>-->
+
+        <!--
+            The remainder of the page is one large FlipView that displays details for
+            one item at a time, allowing the user to flip through all items in the chosen
+            group
+        -->
+        <FlipView
+            x:Name="flipView"
+            AutomationProperties.AutomationId="ItemsFlipView"
+            AutomationProperties.Name="Item Details"
+            TabIndex="1"
+            Grid.Row="1"
+            ItemsSource="{Binding Source={StaticResource itemsViewSource}}">
+
+            <FlipView.ItemContainerStyle>
+                <Style TargetType="FlipViewItem">
+                    <Setter Property="Margin" Value="0,0,0,0"/>
+                </Style>
+            </FlipView.ItemContainerStyle>
+
+            <FlipView.ItemTemplate>
+                <!--
+                    UserControl chosen as the templated item because it supports visual state management
+                    Loaded/unloaded events explicitly subscribe to view state updates from the page
+                -->
+                <DataTemplate>
+                    <!-- Three-column grid for item-detail layout -->
+                    <Grid Margin="120,0,20,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="400" />
+                            <ColumnDefinition Width="40" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                            <TextBlock Text="{Binding Title}" Margin="0,-10,0,10" Style="{StaticResource SubheaderTextBlockStyle}" TextWrapping="NoWrap"/>
+                            <TextBlock Text="{Binding Subtitle}" Margin="0,0,0,20" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="NoWrap"/>
+                            <Image x:Name="image" Width="400" Margin="0,0,0,20" Stretch="UniformToFill" Source="{Binding ImagePath}"/>
+                            <TextBlock Text="{Binding Description}" Margin="0,0,0,30" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <UserControl x:Name="contentControl" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
+                            <ScrollViewer x:Name="scrollViewer" Style="{StaticResource HorizontalScrollViewerStyle}">
+                                <Grid>
+                                    <!-- Content is allowed to flow across as many columns as needed -->
+                                    <common:RichTextColumns x:Name="richTextColumns">
+                                        <common:RichTextColumns.ColumnTemplate>
+                                            <DataTemplate>
+                                                <RichTextBlockOverflow Width="400" Margin="50,0,0,0">
+                                                    <RichTextBlockOverflow.RenderTransform>
+                                                        <TranslateTransform X="-1" Y="4"/>
+                                                    </RichTextBlockOverflow.RenderTransform>
+                                                </RichTextBlockOverflow>
+                                            </DataTemplate>
+                                        </common:RichTextColumns.ColumnTemplate>
+                                        <RichTextBlock Width="400" Style="{StaticResource ItemRichTextStyle}">
+                                            <Paragraph>
+                                                <Run Text="{Binding Content}"/>
+                                            </Paragraph>
+                                        </RichTextBlock>
+                                    </common:RichTextColumns>
+                                </Grid>
+                            </ScrollViewer>
+                        </UserControl>
+                    </Grid>
+                </DataTemplate>
+            </FlipView.ItemTemplate>
+        </FlipView>
 
         <!-- Back button and page title -->
         <Grid>

@@ -6,10 +6,18 @@
     xmlns:localData="using:GridApp.Data">
 
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- 
+                    Styles that define common aspects of the platform look and feel
+                    Required by Visual Studio project and item templates
+                 -->
+                <ResourceDictionary Source="Common/RichTextBlockStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <!-- Application-specific resources -->
+            <!-- Application-specific resources -->
 
-        <x:String x:Key="AppName">GridApp</x:String>
-
+            <x:String x:Key="AppName">GridApp</x:String>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -66,6 +66,9 @@ namespace GridApp
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
             var item = await SampleDataSource.GetItemAsync((String)e.NavigationParameter);
             this.DefaultViewModel["Item"] = item;
+            this.DefaultViewModel["Group"] = item.Group;
+            this.DefaultViewModel["Items"] = item.Group.Items;
+            this.flipView.SelectedItem = item;
         }
 
         #region NavigationHelper registration

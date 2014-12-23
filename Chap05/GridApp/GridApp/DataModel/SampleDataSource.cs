@@ -23,8 +23,9 @@ namespace GridApp.Data
     /// </summary>
     public class SampleDataItem
     {
-        public SampleDataItem(String uniqueId, String title, String subtitle, String imagePath, String description, String content)
+        public SampleDataItem(SampleDataGroup group, String uniqueId, String title, String subtitle, String imagePath, String description, String content)
         {
+            this.Group = group;
             this.UniqueId = uniqueId;
             this.Title = title;
             this.Subtitle = subtitle;
@@ -33,6 +34,7 @@ namespace GridApp.Data
             this.Content = content;
         }
 
+        public SampleDataGroup Group { get; private set; }
         public string UniqueId { get; private set; }
         public string Title { get; private set; }
         public string Subtitle { get; private set; }
@@ -139,7 +141,8 @@ namespace GridApp.Data
                 foreach (JsonValue itemValue in groupObject["Items"].GetArray())
                 {
                     JsonObject itemObject = itemValue.GetObject();
-                    group.Items.Add(new SampleDataItem(itemObject["UniqueId"].GetString(),
+                    group.Items.Add(new SampleDataItem(group,
+                                                       itemObject["UniqueId"].GetString(),
                                                        itemObject["Title"].GetString(),
                                                        itemObject["Subtitle"].GetString(),
                                                        itemObject["ImagePath"].GetString(),
