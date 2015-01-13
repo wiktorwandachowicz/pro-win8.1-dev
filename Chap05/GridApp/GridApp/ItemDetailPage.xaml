@@ -38,25 +38,6 @@
         </Grid.RowDefinitions>
 
         <!--
-            TODO: Content should be placed within the following grid 
-                  to show details for the current item
-        -->
-        <!--<Grid Grid.Row="1" x:Name="contentRegion">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Border Background="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}" Width="180" Height="180" VerticalAlignment="Top">
-                <Image Source="{Binding ImagePath}" Stretch="UniformToFill" AutomationProperties.Name="{Binding Title}"/>
-            </Border>
-            <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="10,0,10,50">
-                <TextBlock Text="{Binding Title}" Style="{StaticResource SubheaderTextBlockStyle}" TextWrapping="NoWrap"/>
-                <TextBlock Text="{Binding Subtitle}" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="NoWrap" Margin="0,0,0,20"/>
-                <TextBlock Text="{Binding Content}" Style="{StaticResource BodyTextBlockStyle}"/>
-            </StackPanel>
-        </Grid>-->
-
-        <!--
             The remainder of the page is one large FlipView that displays details for
             one item at a time, allowing the user to flip through all items in the chosen
             group
@@ -76,35 +57,34 @@
             </FlipView.ItemContainerStyle>
 
             <FlipView.ItemTemplate>
-                <!--
-                    UserControl chosen as the templated item because it supports visual state management
-                    Loaded/unloaded events explicitly subscribe to view state updates from the page
-                -->
                 <DataTemplate>
-                    <!-- Three-column grid for item-detail layout -->
-                    <Grid Margin="120,0,20,20">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="400" />
-                            <ColumnDefinition Width="40" />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+                    <Grid>
+                        <!-- Three-column grid for item-detail layout -->
+                        <Grid x:Name="horizontalTemplate" Margin="120,0,20,20" Visibility="Visible">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="400" />
+                                <ColumnDefinition Width="40" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-                        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
-                            <TextBlock Text="{Binding Title}" Margin="0,-10,0,10" Style="{StaticResource SubheaderTextBlockStyle}" TextWrapping="NoWrap"/>
-                            <TextBlock Text="{Binding Subtitle}" Margin="0,0,0,20" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="NoWrap"/>
-                            <Image x:Name="image" Width="400" Margin="0,0,0,20" Stretch="UniformToFill" Source="{Binding ImagePath}"/>
-                            <TextBlock Text="{Binding Description}" Margin="0,0,0,30" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="Wrap"/>
-                        </StackPanel>
+                            <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                <TextBlock x:Name="titleH" Text="{Binding Title}" Margin="0,-10,0,10" Style="{StaticResource SubheaderTextBlockStyle}" TextWrapping="NoWrap"/>
+                                <TextBlock x:Name="subtitleH" Text="{Binding Subtitle}" Margin="0,0,0,20" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="NoWrap"/>
+                                <Image x:Name="imageH" Width="400" Margin="0,0,0,20" Stretch="UniformToFill" Source="{Binding ImagePath}"/>
+                                <TextBlock x:Name="descriptionH" Text="{Binding Description}" Margin="0,0,0,30" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="Wrap"/>
+                            </StackPanel>
 
-                        <UserControl x:Name="contentControl" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
-                            <ScrollViewer x:Name="scrollViewer" Style="{StaticResource HorizontalScrollViewerStyle}">
+                            <!--
+                                UserControl chosen as the templated item because it supports visual state management
+                            -->
+                            <ScrollViewer x:Name="scrollViewerH" Style="{StaticResource HorizontalScrollViewerStyle}" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2">
                                 <Grid>
                                     <!-- Content is allowed to flow across as many columns as needed -->
-                                    <common:RichTextColumns x:Name="richTextColumns">
+                                    <common:RichTextColumns x:Name="richTextColumnsH">
                                         <common:RichTextColumns.ColumnTemplate>
                                             <DataTemplate>
                                                 <RichTextBlockOverflow Width="400" Margin="50,0,0,0">
@@ -122,6 +102,124 @@
                                     </common:RichTextColumns>
                                 </Grid>
                             </ScrollViewer>
+                        </Grid>
+
+                        <!--
+                            UserControl chosen as the templated item because it supports visual state management
+                            Loaded/unloaded events explicitly subscribe to view state updates from the page
+                        -->
+                        <UserControl x:Name="verticalTemplate" Visibility="Collapsed" Loaded="StartLayoutUpdates" Unloaded="StopLayoutUpdates">
+                            <!-- One-column grid for item-detail layout -->
+                            <Grid x:Name="verticalFlipGrid" Margin="20,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                    <TextBlock x:Name="titleV" Text="{Binding Title}" Margin="0,-10,0,10" Style="{StaticResource SubheaderTextBlockStyle}" TextWrapping="NoWrap"/>
+                                    <TextBlock x:Name="subtitleV" Text="{Binding Subtitle}" Margin="0,0,0,20" Style="{StaticResource SubtitleTextBlockStyle}" TextWrapping="NoWrap"/>
+                                </StackPanel>
+
+                                <ScrollViewer x:Name="verticalScrollViewer" Style="{StaticResource VerticalScrollViewerStyle}" Grid.Row="1" Grid.Column="0">
+
+                                    <Grid Margin="0,0,30,0" >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                            <Image x:Name="imageV" Width="400" Margin="0,0,0,20" Stretch="UniformToFill" Source="{Binding ImagePath}" HorizontalAlignment="Left"/>
+                                            <TextBlock x:Name="descriptionV" Text="{Binding Description}" Margin="0,0,0,30" Style="{StaticResource BaseTextBlockStyle}" TextWrapping="Wrap"/>
+                                        </StackPanel>
+
+                                        <UserControl x:Name="contentControlV" Grid.Row="1" Grid.Column="0">
+                                            <Grid>
+                                                <!-- Content is allowed to flow across as many columns as needed -->
+                                                <common:RichTextColumns x:Name="richTextColumnsV">
+                                                    <common:RichTextColumns.ColumnTemplate>
+                                                        <DataTemplate>
+                                                            <RichTextBlockOverflow Width="*" Margin="50,0,0,0">
+                                                                <RichTextBlockOverflow.RenderTransform>
+                                                                    <TranslateTransform X="-1" Y="4"/>
+                                                                </RichTextBlockOverflow.RenderTransform>
+                                                            </RichTextBlockOverflow>
+                                                        </DataTemplate>
+                                                    </common:RichTextColumns.ColumnTemplate>
+                                                    <RichTextBlock Width="Auto" Style="{StaticResource ItemRichTextStyle}">
+                                                        <Paragraph>
+                                                            <Run Text="{Binding Content}"/>
+                                                        </Paragraph>
+                                                    </RichTextBlock>
+                                                </common:RichTextColumns>
+                                            </Grid>
+                                        </UserControl>
+                                    </Grid>
+
+                                </ScrollViewer>
+
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup>
+                                        <VisualState x:Name="DefaultLayout">
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="horizontalTemplate" Storyboard.TargetProperty="Visibility">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="verticalTemplate" Storyboard.TargetProperty="Visibility">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="imageV" Storyboard.TargetProperty="Width">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="400"/>
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="MinimalLayout">
+                                            <Storyboard>
+                                                <Storyboard>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="horizontalTemplate" Storyboard.TargetProperty="Visibility">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="verticalTemplate" Storyboard.TargetProperty="Visibility">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="verticalFlipGrid" Storyboard.TargetProperty="Margin">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="20,0,0,20"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="imageV" Storyboard.TargetProperty="Width">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="300"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="PortraitLayout">
+                                            <Storyboard>
+                                                <Storyboard>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="horizontalTemplate" Storyboard.TargetProperty="Visibility">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="verticalTemplate" Storyboard.TargetProperty="Visibility">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="verticalFlipGrid" Storyboard.TargetProperty="Margin">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="20,0,10,20"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="imageV" Storyboard.TargetProperty="Width">
+                                                        <DiscreteObjectKeyFrame KeyTime="0" Value="400"/>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                </Storyboard>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                            </Grid>
                         </UserControl>
                     </Grid>
                 </DataTemplate>

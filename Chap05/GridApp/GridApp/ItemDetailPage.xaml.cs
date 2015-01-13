@@ -48,6 +48,20 @@ namespace GridApp
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += navigationHelper_LoadState;
+            this.SizeChanged += MainPage_SizeChanged;
+
+            // When this page is part of the visual tree make one change:
+            // 1) Map application view state to visual state for the page
+            this.Loaded += (sender, e) =>
+            {
+                this.StartLayoutUpdates(sender, e);
+            };
+
+            // Undo the same change when the page is no longer visible
+            this.Unloaded += (sender, e) =>
+            {
+                this.StopLayoutUpdates(sender, e);
+            };
         }
 
         /// <summary>
@@ -69,6 +83,104 @@ namespace GridApp
             this.DefaultViewModel["Group"] = item.Group;
             this.DefaultViewModel["Items"] = item.Group.Items;
             this.flipView.SelectedItem = item;
+        }
+
+        private List<Control> _layoutAwareControls;
+        private string _currentVisualState;
+
+        void MainPage_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width <= 500)
+            {
+                _currentVisualState = "MinimalLayout";
+            }
+            else if (e.NewSize.Width < e.NewSize.Height)
+            {
+                _currentVisualState = "PortraitLayout";
+            }
+            else
+            {
+                _currentVisualState = "DefaultLayout";
+            }
+            InvalidateVisualState();
+        }
+
+        /// <summary>
+        /// Invoked as an event handler, typically on the <see cref="FrameworkElement.Loaded"/>
+        /// event of a <see cref="Control"/> within the page, to indicate that the sender should
+        /// start receiving visual state management changes that correspond to application view
+        /// state changes.
+        /// </summary>
+        /// <param name="sender">Instance of <see cref="Control"/> that supports visual state
+        /// management corresponding to view states.</param>
+        /// <param name="e">Event data that describes how the request was made.</param>
+        /// <remarks>The current view state will immediately be used to set the corresponding
+        /// visual state when layout updates are requested.  A corresponding
+        /// <see cref="FrameworkElement.Unloaded"/> event handler connected to
+        /// <see cref="StopLayoutUpdates"/> is strongly encouraged.  Instances of
+        /// <see cref="LayoutAwarePage"/> automatically invoke these handlers in their Loaded and
+        /// Unloaded events.</remarks>
+        /// <seealso cref="DetermineVisualState"/>
+        /// <seealso cref="InvalidateVisualState"/>
+        public void StartLayoutUpdates(object sender, RoutedEventArgs e)
+        {
+            var control = sender as Control;
+            if (control == null) return;
+            if (this._layoutAwareControls == null)
+            {
+                // Start listening to view state changes when there are controls interested in updates
+                //Window.Current.SizeChanged += this.Window_SizeChanged;
+                this._layoutAwareControls = new List<Control>();
+            }
+            this._layoutAwareControls.Add(control);
+
+            // Set the initial visual state of the control
+            VisualStateManager.GoToState(control, _currentVisualState, false);
+        }
+
+        /// <summary>
+        /// Invoked as an event handler, typically on the <see cref="FrameworkElement.Unloaded"/>
+        /// event of a <see cref="Control"/>, to indicate that the sender should start receiving
+        /// visual state management changes that correspond to application view state changes.
+        /// </summary>
+        /// <param name="sender">Instance of <see cref="Control"/> that supports visual state
+        /// management corresponding to view states.</param>
+        /// <param name="e">Event data that describes how the request was made.</param>
+        /// <remarks>The current view state will immediately be used to set the corresponding
+        /// visual state when layout updates are requested.</remarks>
+        /// <seealso cref="StartLayoutUpdates"/>
+        public void StopLayoutUpdates(object sender, RoutedEventArgs e)
+        {
+            var control = sender as Control;
+            if (control == null || this._layoutAwareControls == null) return;
+            this._layoutAwareControls.Remove(control);
+            if (this._layoutAwareControls.Count == 0)
+            {
+                // Stop listening to view state changes when no controls are interested in updates
+                this._layoutAwareControls = null;
+                //Window.Current.SizeChanged -= this.Window_SizeChanged;
+            }
+        }
+
+        /// <summary>
+        /// Updates all controls that are listening for visual state changes with the correct
+        /// visual state.
+        /// </summary>
+        /// <remarks>
+        /// Typically used in conjunction with overriding <see cref="DetermineVisualState"/> to
+        /// signal that a different value may be returned even though the view state has not
+        /// changed.
+        /// </remarks>
+        public void InvalidateVisualState()
+        {
+            if (this._layoutAwareControls != null)
+            {
+                string visualState = _currentVisualState;
+                foreach (var layoutAwareControl in this._layoutAwareControls)
+                {
+                    VisualStateManager.GoToState(layoutAwareControl, visualState, false);
+                }
+            }
         }
 
         #region NavigationHelper registration
